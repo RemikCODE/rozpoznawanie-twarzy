@@ -93,7 +93,7 @@ def _warmup() -> None:
 
                     if _embeddings_total > 200:
                         print(
-                            f"\n   ⚠  Duży dataset ({_embeddings_total} zdjęć). Następnym razem"
+                            f"\n  Duży dataset ({_embeddings_total} zdjęć). Następnym razem"
                             f" zbuduj bazę z wyprzedzeniem:\n      python service.py --build-db\n"
                             f"   i pozostaw działający w tle."
                             f" Po zakończeniu każde kolejne uruchomienie zajmie ~30 s.\n"
@@ -112,17 +112,20 @@ def _warmup() -> None:
                             silent=True,
                         )
                         elapsed2 = time.time() - t1
-                        print(f"[Embeddings] Baza embeddingów gotowa ({elapsed2:.1f} s)")
+                        print(f"[Embeddings] Baza embeddingow gotowa ({elapsed2:.1f} s)")
                     except Exception as emb_err:
                         print(f"[Embeddings] Nie udało się wstępnie zbudować embeddingów: {emb_err}")
 
                     _embeddings_ready = True
         else:
-            print("ℹ  [Warmup] Brak datasetu – embeddingi zostaną zbudowane po uruchomieniu z --dataset.")
+            print("  [Warmup] Brak datasetu – embeddingi zostaną zbudowane po uruchomieniu z --dataset.")
             _embeddings_ready = True
 
         total = time.time() - _warmup_start
         print(f"\n[Warmup] Serwis gotowy do pracy! (łączny czas: {total:.1f} s)\n")
+        print(f"model: {MODEL_NAME}, detektor: {DETECTOR}, metryka: {DISTANCE_METRIC} \n")
+        print (f"wyniki na {BACKEND_PORT})\n")
+        print("---------------------------------------------------------------------------------\n")
 
     except Exception as exc:
         _warmup_error = str(exc)
@@ -338,7 +341,7 @@ def _build_db_only(dataset_path: str) -> None:
         sys.exit(0)
 
     est = _estimate_build_minutes(len(imgs))
-    print(f"⏳ Budowanie bazy embeddingów dla {len(imgs)} zdjęć (~{est} min)…")
+    print(f" Budowanie bazy embeddingów dla {len(imgs)} zdjęć (~{est} min)…")
     print(f"   Model:   {MODEL_NAME} | Detektor: {DETECTOR}")
     print(f"   Wynik:   {pkl}")
     print("   Zostaw uruchomiony i wróć po zakończeniu.\n")
@@ -423,7 +426,7 @@ def main():
         for ip in lan_ips:
             print(f"      http://{ip}:{args.port}/recognize")
 
-    print(f"\n Aplikacja desktop/mobilna (MAUI) łączy się z backendem ASP.NET, nie z tym serwisem!")
+    print(f"\n Aplikacja desktop/mobilna (MAUI) łączy się z backendem asp net port {BACKEND_PORT}, nie z tym serwisem")
     print(f"   URL backendu (zakodowany w aplikacji):")
     print(f"      Windows desktop:      http://localhost:{BACKEND_PORT}")
     print(f"      Emulator Android:     http://10.0.2.2:{BACKEND_PORT}")
