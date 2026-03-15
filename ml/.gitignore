@@ -1,0 +1,17 @@
+dataset/*
+!dataset/.gitkeep
+
+
+*.pkl
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+
+
+*.tmp
+*.log
+
+
