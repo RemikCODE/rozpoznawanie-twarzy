@@ -1,0 +1,30 @@
+### List all persons (paginated, first page)
+GET http://localhost:5000/api/persons
+Accept: application/json
+
+### List persons with search
+GET http://localhost:5000/api/persons?search=Robert&page=1&pageSize=20
+Accept: application/json
+
+### Get person by ID
+GET http://localhost:5000/api/persons/1
+Accept: application/json
+
+### Seed database from CSV
+POST http://localhost:5000/api/persons/seed
+Content-Type: application/json
+
+{
+  "csvFilePath": "/path/to/your/faces.csv"
+}
+
+### Recognize a face (replace path with actual image file)
+POST http://localhost:5000/api/faces/recognize
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="test_face.jpg"
+Content-Type: image/jpeg
+
+< /path/to/your/test_face.jpg
+------FormBoundary--
