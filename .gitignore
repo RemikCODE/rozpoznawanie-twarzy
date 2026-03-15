@@ -4,3 +4,5 @@ ml/dataset/
 **/bin/
 **/obj/
 *.apk
+*.cache
+*.tmp
