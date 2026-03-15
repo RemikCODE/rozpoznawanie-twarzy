@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FaceRecognitionApp.HistoryPage"
+             Title="historia"
+             BackgroundColor="{DynamicResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ── Header ── -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto"
+              BackgroundColor="{DynamicResource Surface}"
+              Padding="20,28,16,20">
+            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                <Label Text="historia rozpoznan"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="{DynamicResource TextPrimary}"
+                       CharacterSpacing="0.3" />
+                <Label Text="wyniki pobrane z backendu"
+                       FontSize="13"
+                       TextColor="{DynamicResource TextSecondary}" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1"
+                    x:Name="RefreshButton"
+                    Text="odswiez"
+                    FontSize="13"
+                    TextColor="{DynamicResource TextPrimary}"
+                    BackgroundColor="{DynamicResource SurfaceElev}"
+                    BorderColor="{DynamicResource BorderColor}"
+                    BorderWidth="1"
+                    CornerRadius="8"
+                    Clicked="OnRefreshClicked"
+                    VerticalOptions="Center"
+                    HeightRequest="36"
+                    Padding="12,0" />
+            <!-- bottom border -->
+        </Grid>
+        <BoxView Grid.Row="0"
+                 HeightRequest="1"
+                 VerticalOptions="End"
+                 Color="{DynamicResource BorderColor}" />
+
+        <!-- ── Content ── -->
+        <Grid Grid.Row="1">
+
+            <!-- Loading overlay -->
+            <VerticalStackLayout x:Name="LoadingPanel"
+                                 IsVisible="False"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="Center"
+                                 Spacing="12">
+                <ActivityIndicator IsRunning="True"
+                                   Color="{DynamicResource Accent}"
+                                   HorizontalOptions="Center" />
+                <Label Text="ladowanie"
+                       FontSize="14"
+                       TextColor="{DynamicResource TextSecondary}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Error panel -->
+            <VerticalStackLayout x:Name="ErrorPanel"
+                                 IsVisible="False"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="Center"
+                                 Padding="32"
+                                 Spacing="10">
+                <Border StrokeShape="RoundRectangle 6"
+                        Stroke="{DynamicResource ErrorColor}"
+                        StrokeThickness="1"
+                        BackgroundColor="{DynamicResource SurfaceElev}"
+                        Padding="8,4"
+                        HorizontalOptions="Center">
+                    <Label Text="blad"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="{DynamicResource ErrorColor}" />
+                </Border>
+                <Label x:Name="ErrorLabel"
+                       FontSize="14"
+                       TextColor="{DynamicResource TextSecondary}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Results list -->
+            <RefreshView x:Name="RefreshView"
+                         Refreshing="OnPullRefreshing">
+                <CollectionView x:Name="ResultsList"
+                                Margin="16,12,16,16">
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,8"
+                                    StrokeShape="RoundRectangle 10"
+                                    Stroke="{DynamicResource BorderColor}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{DynamicResource Surface}"
+                                    Padding="16,13">
+                                <Grid ColumnDefinitions="*,Auto"
+                                      RowDefinitions="Auto,Auto,Auto"
+                                      RowSpacing="5"
+                                      ColumnSpacing="10">
+
+                                    <!-- Name -->
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding Name}"
+                                           FontSize="15"
+                                           FontAttributes="Bold"
+                                           TextColor="{DynamicResource TextPrimary}"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Status badge -->
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                           Text="{Binding Status}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding StatusColor}"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Time -->
+                                    <Label Grid.Row="1" Grid.Column="0"
+                                           Text="{Binding TimeText}"
+                                           FontSize="12"
+                                           TextColor="{DynamicResource TextSecondary}" />
+
+                                    <!-- Confidence -->
+                                    <Label Grid.Row="1" Grid.Column="1"
+                                           Text="{Binding Confidence}"
+                                           FontSize="12"
+                                           TextColor="{DynamicResource TextSecondary}" />
+
+                                    <!-- Message -->
+                                    <Label Grid.Row="2" Grid.ColumnSpan="2"
+                                           Text="{Binding Message}"
+                                           FontSize="12"
+                                           TextColor="{DynamicResource TextMuted}"
+                                           LineBreakMode="TailTruncation" />
+
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout VerticalOptions="Center"
+                                             HorizontalOptions="Center"
+                                             Spacing="10"
+                                             Margin="0,60,0,0">
+                            <Label Text="brak historii rozpoznan"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   TextColor="{DynamicResource TextSecondary}"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="rozpoznaj twarz aby zobaczyc wyniki tutaj"
+                                   FontSize="13"
+                                   TextColor="{DynamicResource TextMuted}"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+
+                </CollectionView>
+            </RefreshView>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>
