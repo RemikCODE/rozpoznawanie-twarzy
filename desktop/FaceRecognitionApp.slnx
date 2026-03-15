@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="FaceRecognitionApp/FaceRecognitionApp.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
