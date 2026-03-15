@@ -56,8 +56,8 @@ def _warmup() -> None:
     global _deepface, _model_ready, _warmup_error, _embeddings_ready, _embeddings_total
 
     try:
-        print("⏳ [Warmup] Wczytywanie TensorFlow i modelu Facenet…")
-        print("   (pierwsze uruchomienie może potrwać kilkanaście sekund – pobieranie wag ~93 MB)")
+        print(" [Warmup] Wczytywanie TensorFlow i modelu Facenet…")
+        print(" (pierwsze uruchomienie może potrwać kilkanaście sekund – pobieranie wag ~93 MB)")
         t0 = time.time()
 
         from deepface import DeepFace
@@ -66,7 +66,7 @@ def _warmup() -> None:
         _deepface = DeepFace
 
         elapsed = time.time() - t0
-        print(f"✅ [Warmup] Model wczytany ({elapsed:.1f} s)")
+        print(f"[Warmup] Model wczytany ({elapsed:.1f} s)")
 
         _model_ready = True
 
@@ -85,10 +85,10 @@ def _warmup() -> None:
                 pkl_exists, est = _check_pkl(_dataset_path, _embeddings_total)
 
                 if pkl_exists:
-                    print(f"✅ [Embeddings] Wczytano bazę embeddingów z cache ({pkl.name})")
+                    print(f" [Embeddings] Wczytano bazę embeddingów z cache ({pkl.name})")
                     _embeddings_ready = True
                 else:
-                    print(f"⏳ [Embeddings] Budowanie bazy embeddingów ({_embeddings_total} zdjęć)…")
+                    print(f"[Embeddings] Budowanie bazy embeddingów ({_embeddings_total} zdjęć)…")
                     print(f"   Szacowany czas: ~{est} min. Wynik zostanie zapisany jako {pkl.name}.")
 
                     if _embeddings_total > 200:
@@ -112,9 +112,9 @@ def _warmup() -> None:
                             silent=True,
                         )
                         elapsed2 = time.time() - t1
-                        print(f"✅ [Embeddings] Baza embeddingów gotowa ({elapsed2:.1f} s)")
+                        print(f"[Embeddings] Baza embeddingów gotowa ({elapsed2:.1f} s)")
                     except Exception as emb_err:
-                        print(f"⚠  [Embeddings] Nie udało się wstępnie zbudować embeddingów: {emb_err}")
+                        print(f"[Embeddings] Nie udało się wstępnie zbudować embeddingów: {emb_err}")
 
                     _embeddings_ready = True
         else:
@@ -122,11 +122,11 @@ def _warmup() -> None:
             _embeddings_ready = True
 
         total = time.time() - _warmup_start
-        print(f"\n🚀 [Warmup] Serwis gotowy do pracy! (łączny czas: {total:.1f} s)\n")
+        print(f"\n[Warmup] Serwis gotowy do pracy! (łączny czas: {total:.1f} s)\n")
 
     except Exception as exc:
         _warmup_error = str(exc)
-        print(f"\n❌ [Warmup] Błąd podczas wczytywania modelu: {exc}")
+        print(f"\n[Warmup] Błąd podczas wczytywania modelu: {exc}")
         print("   Serwis nie będzie mógł rozpoznawać twarzy. Sprawdź instalację zależności.\n")
 
 @app.route("/health", methods=["GET"])
@@ -248,18 +248,18 @@ def add_person():
     global _embeddings_ready
 
     if _dataset_path is None:
-        return jsonify({"error": "Dataset path not configured. Start service with --dataset."}), 503
+        return jsonify({"error": "sciezka dataset nieskonfigurowana uzyj --dataset."}), 503
 
     name = (request.form.get("name") or "").strip()
     if not name:
-        return jsonify({"error": "Missing or empty 'name' field."}), 400
+        return jsonify({"error": "Brakuje lub jest puste pole 'name'."}), 400
 
     if "image" not in request.files:
-        return jsonify({"error": "Missing 'image' field."}), 400
+        return jsonify({"error": "Brakuje pola 'image' w formularzu."}), 400
 
     file = request.files["image"]
     if not file.filename:
-        return jsonify({"error": "Empty file."}), 400
+        return jsonify({"error": "Brakuje pliku."}), 400
 
     safe_name = re.sub(r'[/\\:*?"<>|\x00]', "", name).strip()
     if not safe_name:
@@ -284,18 +284,18 @@ def add_person():
             tmp_dest.unlink(missing_ok=True)
         except Exception:
             pass
-        return jsonify({"error": f"Could not save image: {exc}"}), 500
+        return jsonify({"error": f"nie udało się zapisać obrazu: {exc}"}), 500
 
     pkl = _get_pkl_path(_dataset_path)
     if pkl.exists():
         try:
             pkl.unlink()
         except Exception as e:
-            print(f"Warning: could not delete embedding cache {pkl}: {e}")
+            print(f"Warning: nie udalo sie usunac cahse emmbedingow {pkl}: {e}")
 
     _embeddings_ready = False
 
-    return jsonify({"filename": filename}), 201
+    return jsonify({"nazwa pliku": filename}), 201
 
 def _get_lan_ips() -> list[str]:
     ips: list[str] = []
@@ -320,7 +320,7 @@ def _get_lan_ips() -> list[str]:
 def _build_db_only(dataset_path: str) -> None:
     dataset = Path(dataset_path)
     if not dataset.exists():
-        print(f"❌ Folder datasetu nie istnieje: {dataset_path}")
+        print(f" Folder datasetu nie istnieje: {dataset_path}")
         sys.exit(1)
 
     imgs = sorted(
@@ -333,7 +333,7 @@ def _build_db_only(dataset_path: str) -> None:
 
     pkl = _get_pkl_path(dataset_path)
     if pkl.exists():
-        print(f"✅ Baza embeddingów już istnieje: {pkl}")
+        print(f" Baza embeddingów już istnieje: {pkl}")
         print("   Usuń plik .pkl jeśli chcesz przebudować bazę od zera.")
         sys.exit(0)
 
@@ -361,11 +361,11 @@ def _build_db_only(dataset_path: str) -> None:
             silent=False,
         )
     except Exception as exc:
-        print(f"\n❌ Błąd podczas budowania bazy: {exc}")
+        print(f"\n Błąd podczas budowania bazy: {exc}")
         sys.exit(1)
 
     elapsed = time.time() - t0
-    print(f"\n✅ Baza embeddingów zbudowana w {elapsed:.0f} s ({elapsed / 60:.1f} min).")
+    print(f"\n Baza embeddingów zbudowana w {elapsed:.0f} s ({elapsed / 60:.1f} min).")
     print(f"   Plik: {pkl}")
     print(f"\n   Teraz uruchom serwis normalnie:")
     print(f"      python service.py --dataset {dataset_path}")
@@ -399,23 +399,22 @@ def main():
     _dataset_path = args.dataset
 
     if not Path(_dataset_path).exists():
-        print(f"⚠ Folder datasetu nie istnieje: {_dataset_path}")
+        print(f" Folder datasetu nie istnieje: {_dataset_path}")
         print("  Utwórz folder i umieść w nim zdjęcia twarzy (np. Jan Kowalski_1.jpg)")
         print("  Serwis wystartuje, ale /recognize zwróci błąd 503 do czasu utworzenia folderu.")
     else:
         img_count = sum(1 for f in Path(_dataset_path).rglob("*")
                         if f.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp"})
-        print(f"✅ Dataset: {_dataset_path} ({img_count} zdjęć)")
+        print(f" Dataset: {_dataset_path} ({img_count} zdjęć)")
         if img_count > 200:
             pkl_exists, est = _check_pkl(_dataset_path, img_count)
             if not pkl_exists:
-                print(f"\n   ⚠  Duży dataset bez pliku .pkl – budowanie bazy zajmie ~{est} min.")
-                print(f"   💡 Aby uniknąć długiego oczekiwania, uruchom wcześniej:")
-                print(f"      python service.py --build-db --dataset {_dataset_path}\n")
+                print(f"\n     Duży dataset bez pliku .pkl – budowanie bazy zajmie ~{est} min.")
+                print(f"      python service.py --build-db --dataset zeby przyspieszyc proves  {_dataset_path}\n")
 
     lan_ips = _get_lan_ips()
 
-    print(f"\n🚀 Serwis startuje na http://{args.host}:{args.port}")
+    print(f"\n Serwis startuje na http://{args.host}:{args.port}")
     print(f"   POST http://localhost:{args.port}/recognize  <- wyslij zdjecie twarzy (backend)")
     print(f"   GET  http://localhost:{args.port}/health     <- diagnostyka / status warmup")
 
@@ -424,7 +423,7 @@ def main():
         for ip in lan_ips:
             print(f"      http://{ip}:{args.port}/recognize")
 
-    print(f"\n💡 Aplikacja desktop/mobilna (MAUI) łączy się z backendem ASP.NET, nie z tym serwisem!")
+    print(f"\n Aplikacja desktop/mobilna (MAUI) łączy się z backendem ASP.NET, nie z tym serwisem!")
     print(f"   URL backendu (zakodowany w aplikacji):")
     print(f"      Windows desktop:      http://localhost:{BACKEND_PORT}")
     print(f"      Emulator Android:     http://10.0.2.2:{BACKEND_PORT}")
@@ -434,7 +433,7 @@ def main():
     else:
         print(f"      Fizyczne urządzenie:  http://<IP-komputera>:{BACKEND_PORT}")
 
-    print("\n⏳ Model wczytuje się w tle – serwis odpowiada na /health natychmiast,")
+    print("\n Model wczytuje się w tle – serwis odpowiada na /health natychmiast,")
     print("   a na /recognize dopiero gdy model i baza embeddingów będą gotowe (patrz logi).\n")
 
     _warmup_start = time.time()
