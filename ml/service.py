@@ -39,7 +39,6 @@ app = Flask(__name__)
 CORS(app)
 
 def _get_pkl_path(dataset_path: str) -> Path:
-    # Używamy nowego pliku z embeddingami
     return Path(dataset_path) / "embeddings_test.pkl"
 
 def _estimate_build_minutes(n_images: int) -> int:
@@ -201,28 +200,33 @@ def recognize():
             file.save(tmp.name)
             tmp_path = tmp.name
 
+        # Sprawdzenie, czy na zdjęciu jest twarz – jeśli nie, DeepFace rzuci wyjątek
+        # Najpierw próbujemy wyciągnąć embedding, aby potwierdzić obecność twarzy
+        with _inference_lock:
+            emb = _deepface.represent(
+                img_path=tmp_path,
+                model_name=MODEL_NAME,
+                detector_backend=DETECTOR,
+                enforce_detection=True,  # Wymuszamy wykrycie twarzy
+                align=True,
+            )
+
+        # Jeśli doszliśmy tutaj, twarz została wykryta
+        if not emb:
+            return jsonify({"label": "", "confidence": 0.0})
+        
+        # Wyciągnięcie embeddingu z wyniku
+        if isinstance(emb, list) and len(emb) > 0:
+            if isinstance(emb[0], dict) and 'embedding' in emb[0]:
+                query = emb[0]['embedding']
+            else:
+                query = emb[0]
+        else:
+            query = emb
+
+        # Rozpoznawanie z użyciem cache w RAM lub DeepFace.find()
         if len(_embeddings_cache) > 0 and len(_filenames_cache) > 0:
             print("\n=== Używam cache w RAM ===")
-            
-            with _inference_lock:
-                emb = _deepface.represent(
-                    img_path=tmp_path,
-                    model_name=MODEL_NAME,
-                    detector_backend=DETECTOR,
-                    enforce_detection=False,
-                    align=True,
-                )
-            
-            if not emb:
-                return jsonify({"label": "", "confidence": 0.0})
-            
-            if isinstance(emb, list) and len(emb) > 0:
-                if isinstance(emb[0], dict) and 'embedding' in emb[0]:
-                    query = emb[0]['embedding']
-                else:
-                    query = emb[0]
-            else:
-                query = emb
             
             best_dist = float('inf')
             best_idx = -1
@@ -243,6 +247,7 @@ def recognize():
             
             return jsonify({"label": "", "confidence": 0.0})
         
+        # Gdy nie ma cache, używamy DeepFace.find() – on też będzie wymuszał wykrycie twarzy
         print("\n=== Używam DeepFace.find() ===")
         with _inference_lock:
             results = _deepface.find(
@@ -251,7 +256,7 @@ def recognize():
                 model_name=MODEL_NAME,
                 distance_metric=DISTANCE_METRIC,
                 detector_backend=DETECTOR,
-                enforce_detection=False,
+                enforce_detection=True,  # Wymuszamy wykrycie twarzy
                 align=True,
                 silent=True,
             )
@@ -265,7 +270,12 @@ def recognize():
 
         return jsonify({"label": label, "confidence": conf})
 
+    except ValueError as e:
+        # To jest wyjątek rzucany przez DeepFace, gdy nie wykryje twarzy (przy enforce_detection=True)
+        print(f" [Recognize] Nie wykryto twarzy: {e}")
+        return jsonify({"label": "", "confidence": 0.0})
     except Exception as e:
+        print(f" [Recognize] Błąd: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         if tmp_path:
@@ -305,15 +315,14 @@ def add_person():
     except Exception as e:
         return jsonify({"error": f"Nie można zapisać: {e}"}), 500
 
-    # === DODAJEMY DO ISTNIEJĄCEGO CACHE (embeddings_test.pkl) ===
+    # === Sprawdzenie, czy na zdjęciu jest twarz i wyciągnięcie embeddingu ===
     try:
-        # Wyciągnij embedding dla nowego zdjęcia
         with _inference_lock:
             emb_result = _deepface.represent(
                 img_path=str(dest),
                 model_name=MODEL_NAME,
                 detector_backend=DETECTOR,
-                enforce_detection=False,
+                enforce_detection=True,  # Wymuszamy wykrycie twarzy – jeśli nie ma, rzuci wyjątek
                 align=True
             )
         
@@ -324,7 +333,7 @@ def add_person():
             else:
                 new_embedding = emb_result[0]
             
-            # DODAJ do istniejących cache (NIGDY NIE USUWAJ!)
+            # DODAJ do istniejących cache
             if _embeddings_cache is None:
                 _embeddings_cache = []
             if _filenames_cache is None:
@@ -336,28 +345,39 @@ def add_person():
             
             print(f" [Add] Dodano embedding do RAM. Teraz: {len(_embeddings_cache)} embeddingów")
             
-            # ZAWSZE nadpisujemy embeddings_test.pkl (NIGDY nie usuwamy!)
+            # ZAWSZE nadpisujemy embeddings_test.pkl
             pkl_path = Path(_dataset_path) / "embeddings_test.pkl"
             with open(pkl_path, 'wb') as f:
-                # Zapisz w formacie (embeddings, filenames)
                 pickle.dump((_embeddings_cache, _filenames_cache), f)
             
             print(f" [Add] Zaktualizowano plik cache: embeddings_test.pkl")
             _embeddings_ready = True
         else:
+            # To nie powinno się zdarzyć, bo przy enforce_detection=True rzucany jest wyjątek
             print(f" [Add] Nie udało się wyciągnąć embeddingu dla nowego zdjęcia")
+            # Usuń plik, bo nie ma twarzy
+            dest.unlink()
+            return jsonify({"error": "Nie wykryto twarzy na zdjęciu"}), 400
             
+    except ValueError as e:
+        # Brak twarzy – usuwamy plik i zwracamy błąd
+        print(f" [Add] Nie wykryto twarzy: {e}")
+        dest.unlink()
+        return jsonify({"error": "Nie wykryto twarzy na zdjęciu"}), 400
     except Exception as e:
         print(f" [Add] Błąd podczas dodawania do cache: {e}")
         import traceback
         traceback.print_exc()
         # Nawet jeśli cache się nie zaktualizował, zdjęcie jest zapisane w archive/
+        # Ale lepiej zwrócić błąd
+        return jsonify({"error": f"Błąd przetwarzania: {e}"}), 500
 
     return jsonify({
         "filename": filename,
         "message": "Zdjęcie dodane do archive/ i embedding zaktualizowany w embeddings_test.pkl",
         "total_embeddings": len(_embeddings_cache)
     }), 201
+
 def main():
     global _dataset_path, _warmup_start
 
