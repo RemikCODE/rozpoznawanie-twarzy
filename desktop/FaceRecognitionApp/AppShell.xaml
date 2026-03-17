@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       x:Class="FaceRecognitionApp.AppShell"
+       Shell.NavBarIsVisible="False">
+    <!--
+        Navigation structure is built in code-behind (AppShell.xaml.cs)
+        so that pages are resolved via the DI container.
+    -->
+</Shell>

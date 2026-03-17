@@ -1,0 +1,8 @@
+.vs/
+ml/dataset/
+*.pkl
+**/bin/
+**/obj/
+*.apk
+*.cache
+*.tmp

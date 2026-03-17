@@ -1,0 +1,89 @@
+@page
+@model FaceRecognitionApi.Pages.Persons.IndexModel
+@{
+    ViewData["Title"] = "baza osob";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">baza osob</h3>
+    <span class="badge bg-secondary fs-6">@Model.Total rekordy</span>
+</div>
+
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text" class="form-control" name="search" value="@Model.Search"
+               placeholder="szukaj po imieniu" />
+        <button type="submit" class="btn btn-dark">szukaj</button>
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <a asp-page="/Persons/Index" class="btn btn-outline-secondary">wyczysc</a>
+        }
+    </div>
+</form>
+
+@if (Model.Persons.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width:80px">#</th>
+                    <th>imie</th>
+                    <th>plik obrazu</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Persons)
+                {
+                    <tr>
+                        <td style="color:var(--bs-secondary-color)">@p.Id</td>
+                        <td class="fw-semibold">@p.Name</td>
+                        <td class="small" style="color:var(--bs-secondary-color)">@p.ImageFileName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-page="/Persons/Index"
+                       asp-route-page="@(Model.CurrentPage - 1)"
+                       asp-route-search="@Model.Search">poprzednia</a>
+                </li>
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-page="/Persons/Index"
+                           asp-route-page="@i"
+                           asp-route-search="@Model.Search">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-page="/Persons/Index"
+                       asp-route-page="@(Model.CurrentPage + 1)"
+                       asp-route-search="@Model.Search">nastepna</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+else
+{
+    <div class="alert alert-info">
+        @if (string.IsNullOrEmpty(Model.Search))
+        {
+            <span>baza jest pusta dodaj pliki obrazow do skonfigurowanego folderu dataset i zrestartuj aplikacje</span>
+        }
+        else
+        {
+            <span>nie znaleziono osob pasujacych do "<strong>@Model.Search</strong>"</span>
+        }
+    </div>
+}

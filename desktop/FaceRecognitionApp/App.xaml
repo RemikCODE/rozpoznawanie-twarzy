@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FaceRecognitionApp.App">
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <!-- ── Dark theme palette ──────────────────────────────────── -->
+            <!-- Page / window background -->
+            <Color x:Key="PageBg">#0D1117</Color>
+            <!-- Card / surface background -->
+            <Color x:Key="Surface">#161B22</Color>
+            <!-- Elevated surface (inner panels) -->
+            <Color x:Key="SurfaceElev">#1C2128</Color>
+            <!-- Subtle border colour -->
+            <Color x:Key="BorderColor">#30363D</Color>
+            <!-- Brand accent – professional blue -->
+            <Color x:Key="Accent">#2563EB</Color>
+            <!-- Pressed-state of accent -->
+            <Color x:Key="AccentPressed">#1D4ED8</Color>
+            <!-- Primary text (near-white) -->
+            <Color x:Key="TextPrimary">#E6EDF3</Color>
+            <!-- Secondary / label text -->
+            <Color x:Key="TextSecondary">#8B949E</Color>
+            <!-- Muted / placeholder text -->
+            <Color x:Key="TextMuted">#6E7681</Color>
+            <!-- Success green -->
+            <Color x:Key="SuccessColor">#3FB950</Color>
+            <!-- Error red -->
+            <Color x:Key="ErrorColor">#F85149</Color>
+            <!-- Warning amber -->
+            <Color x:Key="WarningColor">#D29922</Color>
+
+            <!-- ── Global control styles ──────────────────────────────── -->
+            <Style TargetType="Button">
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

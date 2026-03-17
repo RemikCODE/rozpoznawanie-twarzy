@@ -1,0 +1,21 @@
+# Python ML service – face recognition
+# Instalacja: pip install -r requirements.txt
+#
+# ⚠ WYMAGANIA PYTHONA: Python 3.10 – 3.13
+#   Pobierz Python 3.12 lub 3.13 z https://www.python.org/downloads/
+#
+# ⚠ WINDOWS: Jeśli instalacja się nie powiedzie z błędem "long path",
+#   uruchom jako administrator:
+#     setup-windows.bat         (tworzy venv w C:\facerecog\venv)
+#   lub włącz długie ścieżki jedną komendą PowerShell (jako administrator):
+#     reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+#   i ponów instalację.
+
+deepface>=0.0.98
+flask>=3.1.0
+flask-cors>=6.0.0
+numpy>=1.24.0
+pillow>=10.0.0
+opencv-python-headless>=4.8.0   # headless = brak GUI, krótsze ścieżki niż opencv-python
+tf-keras>=2.16.0
+tensorflow>=2.16.0

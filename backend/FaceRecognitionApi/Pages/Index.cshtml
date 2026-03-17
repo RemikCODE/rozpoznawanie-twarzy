@@ -1,0 +1,59 @@
+@page
+@model FaceRecognitionApi.Pages.IndexModel
+@{
+    ViewData["Title"] = "wyniki rozpoznan";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">wyniki rozpoznan</h3>
+    <span class="badge bg-secondary fs-6" id="totalBadge">@Model.Logs.Count rekordy</span>
+</div>
+
+<p class="small mb-4" style="color: var(--bs-secondary-color)">
+    wyniki pojawiaja sie automatycznie gdy aplikacja mobilna lub desktopowa wysle zdjecie strona odswieza sie co 5 sekund
+</p>
+
+<div id="resultsContainer">
+    @await Html.PartialAsync("_ResultsTable", Model.Logs)
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    let lastId = @(Model.Logs.FirstOrDefault()?.Id ?? 0);
+
+    async function refresh() {
+        try {
+            const resp = await fetch('/api/recognitions?limit=20');
+            if (!resp.ok) return;
+            const logs = await resp.json();
+            if (logs.length === 0) return;
+            if (logs[0].id === lastId) return;   // nic nowego
+
+            lastId = logs[0].id;
+            document.getElementById('totalBadge').textContent = logs.length + ' rekordy';
+
+            const tbody = document.querySelector('#resultsContainer tbody');
+            if (!tbody) { location.reload(); return; }
+
+            tbody.innerHTML = logs.map(l => {
+                const dt = new Date(l.recognizedAt + 'Z').toLocaleString();
+                const badge = l.found
+                    ? `<span class="badge bg-success">znaleziono</span>`
+                    : `<span class="badge bg-warning">nie znaleziono</span>`;
+                const conf = l.found ? `${(l.confidence * 100).toFixed(1)}%` : '—';
+                return `<tr>
+                    <td class="text-muted small">${dt}</td>
+                    <td>${badge}</td>
+                    <td class="fw-semibold">${l.personName || '—'}</td>
+                    <td>${conf}</td>
+                    <td class="small" style="color:var(--bs-secondary-color)">${l.message}</td>
+                </tr>`;
+            }).join('');
+        } catch (e) { /* ignoruj błędy sieci podczas odświeżania */ }
+    }
+
+    setInterval(refresh, 5000);
+})();
+</script>
+}
