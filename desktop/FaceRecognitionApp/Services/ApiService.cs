@@ -11,7 +11,7 @@ public class ApiService
 #if WINDOWS
     private const string BackendBaseUrl = "http://localhost:5233";
 #elif ANDROID
-    private const string BackendBaseUrl = "http://192.168.0.251:5233";  // ← TWÓJ IP!
+    private const string BackendBaseUrl = "http://172.19.234.2:5233";  
 #elif IOS || MACCATALYST
     private const string BackendBaseUrl = "http://192.168.0.251:5233";
 #else

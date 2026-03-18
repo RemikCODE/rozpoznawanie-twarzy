@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiApp2.MainPage"
+             BackgroundColor="#0D1117"
+             Title="Rozpoznawanie twarzy">
+
+    <VerticalStackLayout Padding="16" Spacing="16">
+
+        <!-- Podgląd zdjęcia -->
+        <Frame BackgroundColor="#161B22" CornerRadius="12" HeightRequest="260">
+            <Image x:Name="PreviewImage" Aspect="AspectFit"/>
+        </Frame>
+
+        <!-- Przyciski -->
+        <HorizontalStackLayout Spacing="8">
+            <Button Text="Wybierz zdjęcie" Clicked="SelectPhoto_Clicked" BackgroundColor="#1C2128" TextColor="White"/>
+            <Button Text="Rozpoznaj" Clicked="Recognize_Clicked" BackgroundColor="#2563EB" TextColor="White"/>
+        </HorizontalStackLayout>
+
+        <!-- Loading -->
+        <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" Color="White"/>
+
+        <!-- Wynik w karcie -->
+        <Frame x:Name="ResultFrame" BackgroundColor="#161B22" CornerRadius="12" Padding="16" IsVisible="False">
+            <VerticalStackLayout Spacing="8">
+                <Label x:Name="ResultStatusLabel" TextColor="White" FontSize="18" FontAttributes="Bold"/>
+                <Label x:Name="ResultConfidenceLabel" TextColor="White" FontSize="16"/>
+                <Label x:Name="ResultMessageLabel" TextColor="#8B949E" FontSize="14"/>
+            </VerticalStackLayout>
+        </Frame>
+
+    </VerticalStackLayout>
+</ContentPage>

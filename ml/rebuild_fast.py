@@ -4,7 +4,7 @@ from pathlib import Path
 from deepface import DeepFace
 import time
 
-dataset_path = Path("C:/Users/konra/Desktop/prace vscode/tawrze/rozpoznawanie-twarzy-main/ml/dataset")
+dataset_path = Path("C:/Users/konra/Desktop/prace/twarze/rozpoznawanie-twarzy/ml/dataset")
 print(f"Szukam zdjęć w: {dataset_path}")
 
 # Szukaj we wszystkich podfolderach (w tym archive)
